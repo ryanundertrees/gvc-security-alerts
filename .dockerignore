@@ -11,5 +11,7 @@ data
 dist
 *.zip
 scripts/npm-shim.js
+netlify
+netlify.toml
 PROJECT_SPEC.md
 GITHUB_WORKFLOW_GUIDE.md

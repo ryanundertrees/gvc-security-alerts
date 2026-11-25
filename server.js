@@ -468,6 +468,7 @@ async function startServer() {
       uptime: Math.round(process.uptime()),
       timestamp: new Date().toISOString(),
       dbEngine: db.engine,
+      realtimeMode: 'sse',
       webPushConfigured
     });
   });
@@ -504,12 +505,20 @@ async function startServer() {
   });
 
   // Security view initial state
-  app.get('/api/incidents', requireTeamPin, (_req, res) => {
+  app.get('/api/incidents', requireTeamPin, (req, res) => {
+    const onDutyResponders = db.getOnDutyResponders();
+    const deviceId = String((req.query && req.query.deviceId) || '').trim();
+    const onDuty = deviceId
+      ? onDutyResponders.some((r) => r.device_id === deviceId)
+      : null;
+
     res.json({
       activeIncidents: db.getActiveIncidents(),
       recentResolved: db.getRecentResolvedIncidents(8),
-      onDutyResponders: db.getOnDutyResponders(),
+      onDutyResponders,
+      onDuty,
       maxOnDutyMs: MAX_ON_DUTY_MS,
+      realtimeMode: 'sse',
       vapidPublicKey: VAPID_PUBLIC_KEY
     });
   });
@@ -802,6 +811,7 @@ async function startServer() {
       activeIncident,
       activeDirective,
       latestIncident: sanitizeRoomIncident(latest),
+      realtimeMode: 'sse',
       serverTime: new Date().toISOString()
     });
   });

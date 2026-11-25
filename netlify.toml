@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["web-push"]
+
+# Rewrite Classroom iPad URLs (/room/sweet-grass-1, etc.) to public/room.html
+[[redirects]]
+  from = "/room/*"
+  to = "/room.html"
+  status = 200

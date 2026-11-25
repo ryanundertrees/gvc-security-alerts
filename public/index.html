@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="GVC Security" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg?v=19" />
+  <link rel="apple-touch-icon" href="/icons/icon.svg?v=19" />
+  <link rel="stylesheet" href="/styles.css?v=19" />
+  <title>GVC Security Team Console</title>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Block 1: Top Header Bar -->
+    <header class="top-bar">
+      <div class="brand">
+        <img src="/icons/icon.svg?v=19" alt="GVC Logo" class="brand-icon" />
+        <div>
+          <div class="brand-title">GVC Security Console</div>
+          <div class="brand-subtitle">Live Venue &amp; Classroom Dispatch</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div id="conn-badge" class="conn-badge" role="status">
+          <span class="conn-dot"></span>
+          <span id="conn-text">Connected</span>
+        </div>
+        <button id="push-btn" class="btn btn-sm btn-outline hidden" type="button">
+          🔔 Enable Push
+        </button>
+      </div>
+    </header>
+
+    <!-- PIN Gate Screen -->
+    <section id="pin-gate" class="card">
+      <div class="section-header">
+        <h2 class="section-title">Security Team Sign-In</h2>
+      </div>
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">
+        Enter the shared Team PIN and your responder identity to register on duty and receive live alerts (auto-locks after 6 hours).
+      </p>
+      <div id="lock-reason-banner" class="lock-reason-banner hidden" role="alert"></div>
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="pin-input">Team PIN</label>
+          <input
+            id="pin-input"
+            class="form-input"
+            type="password"
+            inputmode="numeric"
+            placeholder="Enter Team PIN (e.g. 1234)"
+            autocomplete="off"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-name-input">Your Display Name</label>
+          <input
+            id="login-name-input"
+            class="form-input"
+            type="text"
+            placeholder="e.g. Marcus"
+            autocomplete="name"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-post-input">Post / Assignment (Optional)</label>
+          <input
+            id="login-post-input"
+            class="form-input"
+            type="text"
+            placeholder="e.g. Foyer, Sanctuary, Roaming"
+          />
+        </div>
+        <div id="login-error" class="hidden" style="color: var(--danger); font-size: 0.88rem; margin-bottom: 12px;"></div>
+        <button id="login-submit-btn" type="submit" class="btn btn-primary" style="width: 100%;">
+          Unlock Security Console
+        </button>
+      </form>
+    </section>
+
+    <!-- Main Authenticated Console -->
+    <main id="console-view" class="hidden">
+      <!-- Block 2: Current Security Notification (with All Clear button & Responder List) -->
+      <section id="current-notification-block" class="card current-notification-card standby" aria-live="polite">
+        <div class="section-header current-notif-header">
+          <div class="current-notif-title-group">
+            <h2 class="section-title">Current Security Notification</h2>
+            <span id="current-notification-badge" class="notif-status-pill standby">All Clear</span>
+          </div>
+          <button
+            id="all-clear-btn"
+            type="button"
+            class="btn-all-clear hold-action-btn"
+            data-hold-type="all-clear"
+            title="Press and hold 1 second to clear all active alerts"
+          >
+            <span class="hold-fill-overlay" aria-hidden="true"></span>
+            <span class="hold-btn-label-wrap">All Clear <span class="hold-hint-mini">(Hold 1s)</span></span>
+            <span class="hold-bar-bottom" aria-hidden="true"></span>
+          </button>
+        </div>
+        <div id="current-notification-content">
+          <div class="current-notif-standby">
+            <span class="standby-check">✓</span>
+            <div>
+              <div class="current-notif-headline">No Active Security Notifications</div>
+              <div class="current-notif-sub">Venue and classrooms are clear. Standing by.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Block 3: Facility Location Alerts + Emergency Venue Broadcasts -->
+      <section id="preset-section-block" class="card">
+        <div class="section-header">
+          <h2 class="section-title">Facility Alerts</h2>
+          <span style="font-size: 0.78rem; color: var(--text-muted);">Press &amp; hold 1s to dispatch</span>
+        </div>
+
+        <div id="preset-grid" class="zones-container">
+          <!-- Foyer -->
+          <div class="zone-row">
+            <div class="zone-label">
+              <span class="zone-name">Foyer</span>
+            </div>
+            <div class="zone-buttons">
+              <button
+                type="button"
+                class="preset-btn zone-preset-btn urgent hold-action-btn"
+                data-hold-type="preset"
+                data-alert-type="Urgent — Foyer"
+                data-category="urgent"
+              >
+                <span class="hold-fill-overlay" aria-hidden="true"></span>
+                <span class="hold-btn-label-wrap">Urgent</span>
+                <span class="hold-bar-bottom" aria-hidden="true"></span>
+              </button>
+              <button
+                type="button"
+                class="preset-btn zone-preset-btn eyes hold-action-btn"
+                data-hold-type="preset"
+                data-alert-type="Eyes — Foyer"
+                data-category="eyes"
+              >
+                <span class="hold-fill-overlay" aria-hidden="true"></span>
+                <span class="hold-btn-label-wrap">Eyes</span>
+                <span class="hold-bar-bottom" aria-hidden="true"></span>
+              </button>
+              <button
+                type="button"
+                class="preset-btn zone-preset-btn medical hold-action-btn"
+                data-hold-type="preset"
+                data-alert-type="Medical — Foyer"
+                data-category="medical"
+              >
+                <span class="hold-fill-overlay" aria-hidden="true"></span>
+                <span class="hold-btn-label-wrap">Medical</span>
+                <span class="hold-bar-bottom" aria-hidden="true"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Sanctuary -->
+          <div class="zone-row">
+            <div class="zone-label">
+              <span class="zone-name">Sanctuary</span>
+            </div>
+            <div class="zone-buttons">
+              <button
+                type="button"
+                class="preset-btn zone-preset-btn urgent hold-action-btn"
+                data-hold-type="preset"
+                data-alert-type="Urgent — Sanctuary"
+                data-category="urgent"
+              >
+                <span class="hold-fill-overlay" aria-hidden="true"></span>
+                <span class="hold-btn-label-wrap">Urgent</span>
+                <span class="hold-bar-bottom" aria-hidden="true"></span>
+              </button>
+              <button
+                type="button"
+                class="preset-btn zone-preset-btn eyes hold-action-btn"
+                data-hold-type="preset"
+                data-alert-type="Eyes — Sanctuary"
+                data-category="eyes"
+              >
+                <span class="hold-fill-overlay" aria-hidden="true"></span>
+                <span class="hold-btn-label-wrap">Eyes</span>
+                <span class="hold-bar-bottom" aria-hidden="true"></span>
+              </button>
+              <button
+                type="button"
+                class="preset-btn zone-preset-btn medical hold-action-btn"
+                data-hold-type="preset"
+                data-alert-type="Medical — Sanctuary"
+                data-category="medical"
+              >
+                <span class="hold-fill-overlay" aria-hidden="true"></span>
+                <span class="hold-btn-label-wrap">Medical</span>
+                <span class="hold-bar-bottom" aria-hidden="true"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Lower Hallway -->
+          <div class="zone-row">
+            <div class="zone-label">
+              <span class="zone-name">Lower Hallway</span>
+            </div>
+            <div class="zone-buttons">
+              <button
+                type="button"
+                class="preset-btn zone-preset-btn urgent hold-action-btn"
+                data-hold-type="preset"
+                data-alert-type="Urgent — Lower Hallway"
+                data-category="urgent"
+              >
+                <span class="hold-fill-overlay" aria-hidden="true"></span>
+                <span class="hold-btn-label-wrap">Urgent</span>
+                <span class="hold-bar-bottom" aria-hidden="true"></span>
+              </button>
+              <button
+                type="button"
+                class="preset-btn zone-preset-btn eyes hold-action-btn"
+                data-hold-type="preset"
+                data-alert-type="Eyes — Lower Hallway"
+                data-category="eyes"
+              >
+                <span class="hold-fill-overlay" aria-hidden="true"></span>
+                <span class="hold-btn-label-wrap">Eyes</span>
+                <span class="hold-bar-bottom" aria-hidden="true"></span>
+              </button>
+              <button
+                type="button"
+                class="preset-btn zone-preset-btn medical hold-action-btn"
+                data-hold-type="preset"
+                data-alert-type="Medical — Lower Hallway"
+                data-category="medical"
+              >
+                <span class="hold-fill-overlay" aria-hidden="true"></span>
+                <span class="hold-btn-label-wrap">Medical</span>
+                <span class="hold-bar-bottom" aria-hidden="true"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Upper Hallway -->
+          <div class="zone-row">
+            <div class="zone-label">
+              <span class="zone-name">Upper Hallway</span>
+            </div>
+            <div class="zone-buttons">
+              <button
+                type="button"
+                class="preset-btn zone-preset-btn urgent hold-action-btn"
+                data-hold-type="preset"
+                data-alert-type="Urgent — Upper Hallway"
+                data-category="urgent"
+              >
+                <span class="hold-fill-overlay" aria-hidden="true"></span>
+                <span class="hold-btn-label-wrap">Urgent</span>
+                <span class="hold-bar-bottom" aria-hidden="true"></span>
+              </button>
+              <button
+                type="button"
+                class="preset-btn zone-preset-btn eyes hold-action-btn"
+                data-hold-type="preset"
+                data-alert-type="Eyes — Upper Hallway"
+                data-category="eyes"
+              >
+                <span class="hold-fill-overlay" aria-hidden="true"></span>
+                <span class="hold-btn-label-wrap">Eyes</span>
+                <span class="hold-bar-bottom" aria-hidden="true"></span>
+              </button>
+              <button
+                type="button"
+                class="preset-btn zone-preset-btn medical hold-action-btn"
+                data-hold-type="preset"
+                data-alert-type="Medical — Upper Hallway"
+                data-category="medical"
+              >
+                <span class="hold-fill-overlay" aria-hidden="true"></span>
+                <span class="hold-btn-label-wrap">Medical</span>
+                <span class="hold-bar-bottom" aria-hidden="true"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Parking Lot -->
+          <div class="zone-row">
+            <div class="zone-label">
+              <span class="zone-name">Parking Lot</span>
+            </div>
+            <div class="zone-buttons">
+              <button
+                type="button"
+                class="preset-btn zone-preset-btn urgent hold-action-btn"
+                data-hold-type="preset"
+                data-alert-type="Urgent — Parking Lot"
+                data-category="urgent"
+              >
+                <span class="hold-fill-overlay" aria-hidden="true"></span>
+                <span class="hold-btn-label-wrap">Urgent</span>
+                <span class="hold-bar-bottom" aria-hidden="true"></span>
+              </button>
+              <button
+                type="button"
+                class="preset-btn zone-preset-btn eyes hold-action-btn"
+                data-hold-type="preset"
+                data-alert-type="Eyes — Parking Lot"
+                data-category="eyes"
+              >
+                <span class="hold-fill-overlay" aria-hidden="true"></span>
+                <span class="hold-btn-label-wrap">Eyes</span>
+                <span class="hold-bar-bottom" aria-hidden="true"></span>
+              </button>
+              <button
+                type="button"
+                class="preset-btn zone-preset-btn medical hold-action-btn"
+                data-hold-type="preset"
+                data-alert-type="Medical — Parking Lot"
+                data-category="medical"
+              >
+                <span class="hold-fill-overlay" aria-hidden="true"></span>
+                <span class="hold-btn-label-wrap">Medical</span>
+                <span class="hold-bar-bottom" aria-hidden="true"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emergency Venue Broadcast (below location alert buttons) -->
+        <div class="venue-broadcast-group">
+          <div class="section-header" style="margin-bottom: 10px;">
+            <h2 class="section-title" style="color: #fca5a5;">Emergency Venue Broadcast</h2>
+            <span style="font-size: 0.76rem; color: var(--text-muted);">All Responders &amp; All Classroom iPads (Hold 1s)</span>
+          </div>
+          <div class="venue-broadcast-buttons">
+            <button
+              id="lockdown-broadcast-btn"
+              type="button"
+              class="preset-btn venue-broadcast-btn lockdown hold-action-btn"
+              data-hold-type="preset"
+              data-alert-type="LOCKDOWN"
+              data-category="lockdown"
+              data-broadcast-rooms="true"
+            >
+              <span class="hold-fill-overlay" aria-hidden="true"></span>
+              <span class="hold-btn-label-wrap">LOCKDOWN</span>
+              <span class="hold-bar-bottom" aria-hidden="true"></span>
+            </button>
+            <button
+              id="evacuate-broadcast-btn"
+              type="button"
+              class="preset-btn venue-broadcast-btn evacuate hold-action-btn"
+              data-hold-type="preset"
+              data-alert-type="EVACUATE"
+              data-category="evacuate"
+              data-broadcast-rooms="true"
+            >
+              <span class="hold-fill-overlay" aria-hidden="true"></span>
+              <span class="hold-btn-label-wrap">EVACUATE</span>
+              <span class="hold-bar-bottom" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Block 4: Responder Identity Block (immediately below the preset button block) -->
+      <div id="responder-block" class="identity-bar">
+        <div class="identity-info">
+          <span>Responder: <strong id="display-responder-name">Unassigned</strong></span>
+          <span id="display-responder-post" class="identity-badge">Roaming</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button id="edit-profile-btn" class="btn btn-sm btn-outline" type="button">
+            Edit Name / Post
+          </button>
+          <button id="logout-btn" class="btn btn-sm btn-outline" type="button">
+            Lock
+          </button>
+        </div>
+      </div>
+
+      <!-- Inline Responder Profile Editor -->
+      <section id="profile-editor" class="card hidden">
+        <div class="section-header">
+          <h2 class="section-title">Responder Identity</h2>
+        </div>
+        <form id="profile-form">
+          <div class="form-group">
+            <label class="form-label" for="responder-name-input">Responder Name</label>
+            <input
+              id="responder-name-input"
+              class="form-input"
+              type="text"
+              placeholder="Enter your name (e.g. Marcus)"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="responder-post-input">Current Post (Optional)</label>
+            <input
+              id="responder-post-input"
+              class="form-input"
+              type="text"
+              placeholder="e.g. Foyer, Sanctuary, Lower Hallway"
+            />
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button id="save-profile-btn" type="submit" class="btn btn-primary">
+              Save Identity
+            </button>
+            <button id="cancel-profile-btn" type="button" class="btn btn-outline">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- On-Duty Responders List (below the Responder block) -->
+      <section id="on-duty-block" class="card on-duty-card">
+        <div class="section-header" style="margin-bottom: 12px;">
+          <div>
+            <h2 class="section-title">On-Duty Responders</h2>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+              Only unlocked, on-duty team members receive alerts • Auto-locks after 6h
+            </div>
+          </div>
+          <span id="on-duty-count-badge" class="identity-badge">0 On Duty</span>
+        </div>
+        <ul id="on-duty-list" class="on-duty-list">
+          <li class="empty-state">No responders currently registered on duty.</li>
+        </ul>
+      </section>
+
+      <!-- Block 5: Recent Resolved Feed -->
+      <section class="card">
+        <div class="section-header">
+          <h2 class="section-title">Recently Resolved</h2>
+        </div>
+        <div id="resolved-incidents-list" class="incident-list">
+          <div class="empty-state">No resolved incidents yet.</div>
+        </div>
+      </section>
+
+      <!-- Block 6: Classroom iPad Distributions Directory (6 Rooms) -->
+      <section id="classroom-links-block" class="card">
+        <div class="section-header" style="margin-bottom: 10px;">
+          <h2 class="section-title">Classroom iPad Distributions (6 Rooms)</h2>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Pre-baked kiosk URLs</span>
+        </div>
+        <div class="classroom-links-grid">
+          <a href="/room/sweet-grass-1" target="_blank" rel="noopener" class="classroom-link-pill">Sweet Grass 1</a>
+          <a href="/room/sweet-grass-2" target="_blank" rel="noopener" class="classroom-link-pill">Sweet Grass 2</a>
+          <a href="/room/bears-paw-1" target="_blank" rel="noopener" class="classroom-link-pill">Bears Paw 1</a>
+          <a href="/room/bears-paw-2" target="_blank" rel="noopener" class="classroom-link-pill">Bears Paw 2</a>
+          <a href="/room/pioneer-1" target="_blank" rel="noopener" class="classroom-link-pill">Pioneer 1</a>
+          <a href="/room/pioneer-2" target="_blank" rel="noopener" class="classroom-link-pill">Pioneer 2</a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/app.js?v=20"></script>
+</body>
+</html>

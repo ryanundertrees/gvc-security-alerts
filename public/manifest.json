@@ -1,0 +1,19 @@
+{
+  "name": "GVC Security & Classroom Alert",
+  "short_name": "GVC Alerts",
+  "description": "Church Venue Security Team & Classroom Alert Progressive Web App",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b1120",
+  "theme_color": "#0f172a",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

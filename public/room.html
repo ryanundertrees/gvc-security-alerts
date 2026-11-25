@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta id="apple-app-title" name="apple-mobile-web-app-title" content="Classroom Alert" />
+  <link id="room-manifest-link" rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg?v=19" />
+  <link rel="apple-touch-icon" href="/icons/icon.svg?v=19" />
+  <link rel="stylesheet" href="/styles.css?v=19" />
+  <title>Classroom Alert Console</title>
+</head>
+<body>
+  <div class="classroom-container">
+    <!-- Top Connection Header -->
+    <header class="top-bar">
+      <div class="brand">
+        <img src="/icons/icon.svg?v=19" alt="GVC Logo" class="brand-icon" />
+        <div>
+          <div class="brand-title">Children's Ministry Alert</div>
+          <div class="brand-subtitle">Scoped Classroom Kiosk</div>
+        </div>
+      </div>
+      <div id="conn-badge" class="conn-badge" role="status">
+        <span class="conn-dot"></span>
+        <span id="conn-text">Connected</span>
+      </div>
+    </header>
+
+    <!-- Live Confirmation Banner (Shown when room has an active alert or responder reply) -->
+    <section id="confirmation-banner" class="confirmation-banner hidden" aria-live="polite">
+      <div id="confirmation-headline" class="confirmation-status-headline">
+        Alert Dispatched to Security Team
+      </div>
+      <div id="confirmation-subtext" class="confirmation-subtext">
+        Hold tight — security team members are being notified now.
+      </div>
+
+      <!-- Responder Attribution Lines -->
+      <div id="responder-feed" class="responder-feed"></div>
+
+      <div style="margin-top: 14px;">
+        <button id="cancel-alert-btn" type="button" class="btn btn-outline hold-action-btn">
+          <span class="hold-fill-overlay" aria-hidden="true"></span>
+          <span class="hold-btn-label-wrap">Cancel Classroom Alert (Hold 1s)</span>
+          <span class="hold-bar-bottom" aria-hidden="true"></span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Main Button Area (Splits 50/50 when Venue Directive is Active) -->
+    <main id="standby-controls" class="classroom-columns-section">
+      <!-- Top Half Replacement: Venue-Wide Emergency Directive (LOCKDOWN / EVACUATE) -->
+      <section id="venue-directive-banner" class="venue-directive-banner hidden" role="alert" aria-live="assertive">
+        <div id="directive-badge" class="directive-badge">EMERGENCY DIRECTIVE</div>
+        <div id="directive-headline" class="directive-headline">LOCKDOWN</div>
+        <p id="directive-instructions" class="directive-instructions">
+          Secure classroom door immediately, turn off lights, move children out of sight, and remain quiet until All Clear.
+        </p>
+        <div id="directive-meta" class="directive-meta"></div>
+      </section>
+
+      <!-- Three Columnar 1-Second Press-and-Hold Alert Buttons -->
+      <div id="column-buttons-grid" class="column-buttons-grid">
+        <!-- Column 1: Assistance (Yellow Fade) -->
+        <button
+          type="button"
+          class="col-hold-btn assistance"
+          data-tier="Assistance"
+          data-category="eyes"
+          aria-label="Press and hold Assistance for 1 second"
+        >
+          <div class="col-hold-fill"></div>
+          <div class="col-btn-content">
+            <div class="col-btn-text">
+              <span class="col-btn-title">Assistance</span>
+              <span class="col-btn-desc">Classroom Support &amp; Supplies</span>
+            </div>
+            <span class="col-hold-pill">HOLD 1s</span>
+          </div>
+          <div class="col-progress-track">
+            <div class="col-progress-bar"></div>
+          </div>
+        </button>
+
+        <!-- Column 2: MEDICAL (Blue Fade) -->
+        <button
+          type="button"
+          class="col-hold-btn medical"
+          data-tier="MEDICAL"
+          data-category="medical"
+          aria-label="Press and hold MEDICAL for 1 second"
+        >
+          <div class="col-hold-fill"></div>
+          <div class="col-btn-content">
+            <div class="col-btn-text">
+              <span class="col-btn-title">MEDICAL</span>
+              <span class="col-btn-desc">First Aid or Medical Need</span>
+            </div>
+            <span class="col-hold-pill">HOLD 1s</span>
+          </div>
+          <div class="col-progress-track">
+            <div class="col-progress-bar"></div>
+          </div>
+        </button>
+
+        <!-- Column 3: URGENT (Red Fade) -->
+        <button
+          type="button"
+          class="col-hold-btn urgent"
+          data-tier="URGENT"
+          data-category="urgent"
+          aria-label="Press and hold URGENT for 1 second"
+        >
+          <div class="col-hold-fill"></div>
+          <div class="col-btn-content">
+            <div class="col-btn-text">
+              <span class="col-btn-title">URGENT</span>
+              <span class="col-btn-desc">Immediate Security Response</span>
+            </div>
+            <span class="col-hold-pill">HOLD 1s</span>
+          </div>
+          <div class="col-progress-track">
+            <div class="col-progress-bar"></div>
+          </div>
+        </button>
+      </div>
+
+      <p id="hold-hint" class="hold-hint" style="margin-top: 12px;">
+        Kid-Tap Safeguard: Press and hold a button for <strong>1 second</strong> to dispatch alert.
+      </p>
+      <div id="retry-queue-badge" class="hidden" style="margin-top: 8px; text-align: center; color: var(--warning); font-size: 0.85rem; font-weight: 600;">
+        Queued — Retrying send every 2s until confirmed...
+      </div>
+    </main>
+
+    <!-- Classroom Identification Block (Below All Buttons) -->
+    <section id="classroom-id-block" class="room-banner classroom-id-bottom">
+      <div class="room-label">Assigned Classroom</div>
+      <h1 id="room-name-heading" class="room-name-heading">Loading Room...</h1>
+      <div id="standby-status-note" style="font-size: 0.85rem; color: var(--success); margin-top: 4px; font-weight: 600;">
+        ● Standby Ready
+      </div>
+    </section>
+  </div>
+
+  <script src="/room.js?v=20"></script>
+</body>
+</html>
