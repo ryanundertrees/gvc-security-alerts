@@ -1,0 +1,27 @@
+{
+  "name": "gvc-security-alert-pwa",
+  "version": "1.0.0",
+  "description": "Church Venue Security & Classroom Alert Progressive Web App",
+  "homepage": "https://alerts.gallatinvalleychurch.org",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ryanundertrees/gvc_security_alerts.git"
+  },
+  "main": "server.js",
+  "scripts": {
+    "setup": "node scripts/setup.js",
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "node scripts/package-release.js --verify-only",
+    "package": "node scripts/package-release.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "sql.js": "^1.12.0",
+    "web-push": "^3.6.7"
+  }
+}
